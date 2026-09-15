@@ -18,7 +18,7 @@ jobs:
           php-version: '${{ matrix.php }}'
           coverage: none
       - name: Syntax
-        run: find upload tests -name '*.php' -print0 | xargs -0 -n1 php -l
+        run: find upload tests scripts -name '*.php' -print0 | xargs -0 -n1 php -l
       - name: Protocol and HTTP client
         run: php tests/protocol.php
   package:
