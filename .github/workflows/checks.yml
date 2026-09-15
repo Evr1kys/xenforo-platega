@@ -1,0 +1,35 @@
+name: Checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  php:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4', '8.5']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '${{ matrix.php }}'
+          coverage: none
+      - name: Syntax
+        run: find upload tests -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Protocol and HTTP client
+        run: php tests/protocol.php
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check XML and build archive
+        run: |
+          python3 scripts/check-package.py
+          python3 scripts/build.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: xenforo-platega
+          path: dist/*

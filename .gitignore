@@ -1,0 +1,9 @@
+/dist/
+/.local/
+/vendor/
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+/upload/src/addons/Evrik/Platega/hashes.json

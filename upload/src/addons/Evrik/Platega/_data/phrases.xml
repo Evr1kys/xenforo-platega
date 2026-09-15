@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<phrases>
+  <phrase title="evrik_platega_busy" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Платёж уже создаётся. Подождите несколько секунд.]]></phrase>
+  <phrase title="evrik_platega_callback" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[URL уведомлений]]></phrase>
+  <phrase title="evrik_platega_callback_explain" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Скопируйте этот адрес в кабинете Platega: Настройки → Callback URLs. Нужен публичный HTTPS-адрес с действительным сертификатом.]]></phrase>
+  <phrase title="evrik_platega_create_failed" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Не удалось подтвердить создание платежа. Не повторяйте оплату до проверки администратором.]]></phrase>
+  <phrase title="evrik_platega_existing_invoice" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Для этой покупки уже создан платёж или требуется проверка его состояния. Не оплачивайте повторно; обратитесь к администратору.]]></phrase>
+  <phrase title="evrik_platega_https_required" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Для оплаты через Platega форум и ссылки возврата должны использовать HTTPS.]]></phrase>
+  <phrase title="evrik_platega_invalid_amount" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Некорректная сумма платежа. Укажите положительную сумму с точностью до копеек.]]></phrase>
+  <phrase title="evrik_platega_invalid_merchant" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Введите Merchant ID в формате UUID.]]></phrase>
+  <phrase title="evrik_platega_invalid_method" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Выберите доступный способ оплаты.]]></phrase>
+  <phrase title="evrik_platega_invalid_secret" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Введите Secret key без пробелов и управляющих символов.]]></phrase>
+  <phrase title="evrik_platega_live_only" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Platega поддерживает только разовые реальные платежи. Проверьте enableLivePayments и отключите автопродление покупки.]]></phrase>
+  <phrase title="evrik_platega_merchant" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Merchant ID]]></phrase>
+  <phrase title="evrik_platega_method" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Способ оплаты]]></phrase>
+  <phrase title="evrik_platega_method_11" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Банковская карта]]></phrase>
+  <phrase title="evrik_platega_method_12" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Международная оплата]]></phrase>
+  <phrase title="evrik_platega_method_13" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Криптовалюта]]></phrase>
+  <phrase title="evrik_platega_method_14" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[SberPay]]></phrase>
+  <phrase title="evrik_platega_method_2" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[СБП (QR-код)]]></phrase>
+  <phrase title="evrik_platega_method_3" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[ЕРИП]]></phrase>
+  <phrase title="evrik_platega_method_auto" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Выбор на странице Platega]]></phrase>
+  <phrase title="evrik_platega_method_explain" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Способ должен быть подключён к вашему магазину Platega. Валюта покупки — RUB.]]></phrase>
+  <phrase title="evrik_platega_notice" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Разовые платежи в RUB. Автосписания не поддерживаются. При создании платежа Platega получает ID и имя пользователя форума.]]></phrase>
+  <phrase title="evrik_platega_rub_only" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Для оплаты через Platega укажите стоимость покупки в RUB.]]></phrase>
+  <phrase title="evrik_platega_secret" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Secret key]]></phrase>
+  <phrase title="evrik_platega_secret_explain" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Ключ из кабинета Platega. Хранится в настройках платёжного профиля; доступен администраторам с правом управления профилями.]]></phrase>
+</phrases>

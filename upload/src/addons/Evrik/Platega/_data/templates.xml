@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+  <template type="admin" title="payment_profile_evrikPlatega" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[<xf:inforow>{{ phrase('evrik_platega_notice') }}</xf:inforow>
+<xf:textboxrow name="options[merchant_id]" value="{$profile.options.merchant_id}"
+    label="{{ phrase('evrik_platega_merchant') }}" required="true" />
+<xf:textboxrow name="options[secret]" value="{$profile.options.secret}" type="password" autocomplete="new-password"
+    label="{{ phrase('evrik_platega_secret') }}" explain="{{ phrase('evrik_platega_secret_explain') }}" required="true" />
+<xf:selectrow name="options[payment_method]" value="{{ $profile.options.payment_method ?: 0 }}"
+    label="{{ phrase('evrik_platega_method') }}" explain="{{ phrase('evrik_platega_method_explain') }}">
+    <xf:option value="0">{{ phrase('evrik_platega_method_auto') }}</xf:option>
+    <xf:option value="2">{{ phrase('evrik_platega_method_2') }}</xf:option>
+    <xf:option value="3">{{ phrase('evrik_platega_method_3') }}</xf:option>
+    <xf:option value="11">{{ phrase('evrik_platega_method_11') }}</xf:option>
+    <xf:option value="12">{{ phrase('evrik_platega_method_12') }}</xf:option>
+    <xf:option value="13">{{ phrase('evrik_platega_method_13') }}</xf:option>
+    <xf:option value="14">{{ phrase('evrik_platega_method_14') }}</xf:option>
+</xf:selectrow>
+<xf:textboxrow value="{$callbackUrl}" readonly="true"
+    label="{{ phrase('evrik_platega_callback') }}" explain="{{ phrase('evrik_platega_callback_explain') }}" />]]></template>
+</templates>

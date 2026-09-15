@@ -1,0 +1,30 @@
+name: Ошибка
+description: Проблема с установкой или обработкой платежа
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: "Не добавляйте ключи Platega, данные пользователей и полные заголовки запросов."
+  - type: input
+    id: versions
+    attributes:
+      label: Версии
+      description: XenForo, PHP и дополнение
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Как повторить
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Результат и сообщение об ошибке
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Ожидаемый результат

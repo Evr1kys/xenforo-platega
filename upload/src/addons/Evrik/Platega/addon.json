@@ -1,0 +1,23 @@
+{
+    "legacy_addon_id": "",
+    "title": "Platega payments",
+    "description": "Приём платежей через Platega в XenForo.",
+    "version_id": 1000031,
+    "version_string": "1.0.0 Beta 1",
+    "dev": "Evrik",
+    "dev_url": "https://github.com/Evr1kys",
+    "faq_url": "https://github.com/Evr1kys/xenforo-platega/blob/main/docs/INSTALL.md",
+    "support_url": "https://github.com/Evr1kys/xenforo-platega/issues",
+    "extra_urls": {},
+    "require": {
+        "XF": [
+            2020070,
+            "XenForo 2.2.0+"
+        ],
+        "php": [
+            "7.4.0",
+            "PHP 7.4.0+"
+        ]
+    },
+    "icon": "fa-credit-card"
+}
