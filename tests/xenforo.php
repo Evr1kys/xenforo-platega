@@ -212,4 +212,69 @@ try { $provider->completeTransaction($state); } catch (RuntimeException $e) { $t
 verify($thrown, 'Purchasable failure propagates for HTTP 5xx');
 verify($db->fetchOne('SELECT status FROM xf_evrik_platega_invoice WHERE request_key = ?', $rollback->request_key) === 'PENDING', 'Purchasable and ledger writes roll back together');
 verify(runCallback($provider, $data)->paymentResult === \XF\Payment\CallbackState::PAYMENT_RECEIVED, 'Retry after rollback succeeds');
+$manual = purchaseFixture($profile, $upgrade, $user);
+$id5 = '12345678-1234-1234-1234-' . bin2hex(random_bytes(6));
+$client->created = ['transactionId' => $id5, 'url' => 'https://pay.platega.io/?id=' . $id5];
+$provider->initiatePayment($controller, $manual, $purchase);
+$client->remote = ['id' => $id5, 'payload' => $manual->request_key, 'status' => 'PENDING', 'paymentDetails' => ['amount' => 100.5, 'currency' => 'RUB']];
+verify($provider->reconcile($manual->request_key)->httpCode === 503, 'Manual pending payment is not applied');
+$client->fail = true;
+verify($provider->reconcile($manual->request_key)->httpCode === 503, 'Manual API outage preserves purchase');
+$client->fail = false;
+$client->remote['status'] = 'CONFIRMED';
+$client->remote['paymentDetails']['amount'] = 1;
+verify($provider->reconcile($manual->request_key)->httpCode === 403, 'Manual underpayment rejected');
+$client->remote['paymentDetails']['amount'] = 100.5;
+verify($provider->reconcile($manual->request_key, $id4)->httpCode === 403, 'Manual mismatched ID rejected');
+XF::em()->clearEntityCache();
+$state = $provider->reconcile($manual->request_key);
+verify($state->paymentResult === \XF\Payment\CallbackState::PAYMENT_RECEIVED, 'Manual recovery grants purchase');
+XF::em()->clearEntityCache();
+verify(!$provider->reconcile($manual->request_key)->paymentResult, 'Manual recovery is idempotent');
+$client->remote['status'] = 'CHARGEBACKED';
+XF::em()->clearEntityCache();
+verify($provider->reconcile($manual->request_key)->paymentResult === \XF\Payment\CallbackState::PAYMENT_REVERSED, 'Manual recovery handles refund');
+$client->remote['status'] = 'CONFIRMED';
+XF::em()->clearEntityCache();
+verify(!$provider->reconcile($manual->request_key)->paymentResult, 'Manual recovery cannot restore refund');
+verify($provider->reconcile(str_repeat('0',32))->httpCode === 404, 'Unknown manual purchase rejected');
+
+$lost = purchaseFixture($profile, $upgrade, $user);
+$client->fail = true;
+$provider->initiatePayment($controller, $lost, $purchase);
+$client->fail = false;
+$id6 = '12345678-1234-1234-1234-' . bin2hex(random_bytes(6));
+verify($provider->reconcile($lost->request_key)->httpCode === 400, 'Lost transaction requires ID');
+$client->remote['id'] = $id6; $client->remote['payload'] = $lost->request_key;
+XF::em()->clearEntityCache();
+verify($provider->reconcile($lost->request_key, $id6)->paymentResult === \XF\Payment\CallbackState::PAYMENT_RECEIVED, 'Manual recovery binds lost transaction');
+verify($db->fetchOne('SELECT transaction_id FROM xf_evrik_platega_invoice WHERE request_key = ?', $lost->request_key) === $id6, 'Recovered transaction saved');
+$log = json_decode($db->fetchOne('SELECT log_details FROM xf_payment_provider_log WHERE purchase_request_key = ? ORDER BY provider_log_id DESC LIMIT 1', $lost->request_key), true);
+verify($log['source'] === 'admin', 'Manual recovery is identified in payment log');
+
+class TestAdminPayment extends \Evrik\Platega\Admin\Controller\Payment
+{
+    public $testProvider;
+    protected function provider() { return $this->testProvider; }
+    public function assertPermissionForTest() { $this->preDispatchController('Index', new \XF\Mvc\ParameterBag()); }
+}
+$app->extension()->extendClass('TestAdminPayment');
+$adminRequest = new \XF\Http\Request($app->inputFilterer(), [], [], [], ['REQUEST_METHOD' => 'GET']);
+$admin = new TestAdminPayment($app, $adminRequest);
+$admin->testProvider = $provider;
+$reply = $admin->actionIndex();
+$html = $app->templater()->renderTemplate('admin:evrik_platega_payments', $reply->getParams());
+verify(strpos($html, 'request_key') !== false && strpos($html, '_xfToken') !== false, 'Admin page renders CSRF-protected forms');
+$html = $app->templater()->renderTemplate('admin:evrik_platega_result', ['requestKey' => $state->requestKey, 'remoteStatus' => $state->remote['status'], 'message' => $state->logMessage, 'failed' => false]);
+verify(strpos($html, $manual->request_key) !== false, 'Admin result renders');
+$denied = false;
+try { $admin->actionCheck(); } catch (\XF\Mvc\Reply\Exception $e) { $denied = true; }
+verify($denied, 'Manual processing rejects GET');
+$denied = false;
+try { $admin->actionConnection(); } catch (\XF\Mvc\Reply\Exception $e) { $denied = true; }
+verify($denied, 'Connection check rejects GET');
+$denied = false;
+XF::setVisitor(XF::em()->create('XF:User'));
+try { $admin->assertPermissionForTest(); } catch (\XF\Mvc\Reply\Exception $e) { $denied = true; }
+verify($denied, 'Payment permission required');
 echo 'OK: XenForo ' . XF::$version . ", $count integration assertions\n";

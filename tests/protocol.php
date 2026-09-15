@@ -98,4 +98,13 @@ try { $client->create([], 0); } catch (RuntimeException $e) {
     check(strpos($e->getMessage(), 'test-secret') === false && !$e->getPrevious(), 'secret redaction');
 }
 check(count($http->calls) === $before + 1, 'ambiguous POST is not retried');
+$http->error = false; $http->body = '[{"amount":0,"currency":"RUB"}]';
+$client->checkConnection();
+$last = end($http->calls);
+check($last[0] === 'GET' && $last[1] === Client::BASE_URL . '/balance/all', 'read-only connection check');
+check(!isset($last[2]['json']), 'connection check does not create payment');
+$http->body = '{"error":"bad response"}';
+rejects(function () use ($client) { $client->checkConnection(); }, 'invalid balance schema');
+$http->code = 401;
+rejects(function () use ($client) { $client->checkConnection(); }, 'connection rejects invalid credentials');
 echo "OK: $count assertions\n";

@@ -215,27 +215,13 @@ class Platega extends \XF\Payment\AbstractProvider
         }
         $state->secretHeader = '';
         $state->merchantHeader = '';
-        if ($state->invoice['status'] === 'CREATING' && time() - (int)$state->invoice['created_date'] < 60)
+        if (!$this->validateRemoteState($state))
         {
-            return $this->fail($state, 'Invoice creation is still in progress.', 503);
-        }
-        if ($state->invoice['transaction_id'] && $state->invoice['transaction_id'] !== $state->transactionId)
-        {
-            return $this->fail($state, 'Transaction ID mismatch.');
-        }
-        try
-        {
-            $state->remote = $this->client($profile)->transaction($state->transactionId);
-        }
-        catch (\Throwable $e)
-        {
-            return $this->fail($state, 'Platega status lookup unavailable. Retry later.', 503);
+            return false;
         }
         try
         {
             $expected = $state->invoice;
-            $expected['transaction_id'] = $state->transactionId;
-            Protocol::validateTransaction($state->remote, $expected);
             if (($state->event['currency'] ?? null) !== $expected['currency']
                 || Protocol::minorUnits($state->event['amount'] ?? null) !== (int)$expected['amount_minor']
                 || (isset($state->event['payload']) && $state->event['payload'] !== $expected['request_key'])
@@ -246,6 +232,37 @@ class Platega extends \XF\Payment\AbstractProvider
         }
         catch (\Throwable $e)
         {
+            return $this->fail($state, 'Callback does not match the purchase.');
+        }
+        return true;
+    }
+
+    protected function validateRemoteState(CallbackState $state)
+    {
+        if ($state->invoice['status'] === 'CREATING' && time() - (int)$state->invoice['created_date'] < 60)
+        {
+            return $this->fail($state, 'Invoice creation is still in progress.', 503);
+        }
+        if ($state->invoice['transaction_id'] && $state->invoice['transaction_id'] !== $state->transactionId)
+        {
+            return $this->fail($state, 'Transaction ID mismatch.');
+        }
+        try
+        {
+            $state->remote = $this->client($state->getPaymentProfile())->transaction($state->transactionId);
+        }
+        catch (\Throwable $e)
+        {
+            return $this->fail($state, 'Platega status lookup unavailable. Retry later.', 503);
+        }
+        try
+        {
+            $expected = $state->invoice;
+            $expected['transaction_id'] = $state->transactionId;
+            Protocol::validateTransaction($state->remote, $expected);
+        }
+        catch (\Throwable $e)
+        {
             return $this->fail($state, 'Transaction does not match the purchase.');
         }
         if ($state->remote['status'] === 'PENDING')
@@ -253,6 +270,74 @@ class Platega extends \XF\Payment\AbstractProvider
             return $this->fail($state, 'Transaction is not settled yet. Retry later.', 503);
         }
         return true;
+    }
+
+    public function checkConnection(PaymentProfile $profile)
+    {
+        if ($profile->provider_id !== $this->providerId)
+        {
+            throw new \InvalidArgumentException('Not a Platega profile.');
+        }
+        $options = $profile->options;
+        $errors = [];
+        if (!$this->verifyConfig($options, $errors))
+        {
+            throw new \RuntimeException('Invalid Platega profile settings.');
+        }
+        $this->client($profile)->checkConnection();
+    }
+
+    // Called by the permission-protected admin controller; never by a public route.
+    public function reconcile($requestKey, $transactionId = null)
+    {
+        $state = new State();
+        $state->source = 'admin';
+        $state->legacy = false;
+        $state->requestKey = $requestKey;
+        $state->invoice = \XF::db()->fetchRow(
+            'SELECT * FROM ' . self::TABLE . ' WHERE request_key = ?', $requestKey
+        ) ?: [];
+        $profile = $state->getPaymentProfile();
+        $purchase = $state->getPurchaseRequest();
+        if (!$state->invoice || !$profile || !$purchase
+            || $profile->provider_id !== $this->providerId || $purchase->provider_id !== $this->providerId
+            || (int)$state->invoice['payment_profile_id'] !== (int)$profile->payment_profile_id)
+        {
+            $this->fail($state, 'Platega purchase not found.', 404);
+            return $state;
+        }
+        $id = $transactionId ?: $state->invoice['transaction_id'];
+        if (!Protocol::uuid($id))
+        {
+            $this->fail($state, 'A valid transaction ID from Platega is required.', 400);
+            return $state;
+        }
+        $state->transactionId = strtolower($id);
+        if ($this->validateRemoteState($state))
+        {
+            $valid = true;
+            foreach (['validatePurchaseRequest', 'validatePurchasableHandler', 'validatePaymentProfile',
+                'validatePurchaser', 'validatePurchasableData', 'validateCost'] as $method)
+            {
+                if (!$this->$method($state))
+                {
+                    $valid = false;
+                    $state->httpCode = $state->httpCode ?: 403;
+                    break;
+                }
+            }
+            if ($valid)
+            {
+                $this->setProviderMetadata($state);
+                $this->getPaymentResult($state);
+                $this->completeTransaction($state);
+            }
+        }
+        if ($state->logType)
+        {
+            $this->log($state);
+        }
+        return $state;
     }
 
     public function validateTransaction(CallbackState $state)
@@ -326,6 +411,7 @@ class Platega extends \XF\Payment\AbstractProvider
     public function prepareLogData(CallbackState $state)
     {
         $state->logDetails = [
+            'source' => $state->source,
             'transaction_id' => $state->transactionId,
             'verified_status' => $state->remote['status'] ?? null
         ];

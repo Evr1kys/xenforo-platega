@@ -16,5 +16,66 @@
     <xf:option value="14">{{ phrase('evrik_platega_method_14') }}</xf:option>
 </xf:selectrow>
 <xf:textboxrow value="{$callbackUrl}" readonly="true"
-    label="{{ phrase('evrik_platega_callback') }}" explain="{{ phrase('evrik_platega_callback_explain') }}" />]]></template>
+    label="{{ phrase('evrik_platega_callback') }}" explain="{{ phrase('evrik_platega_callback_explain') }}" />
+<xf:inforow><a href="{{ link('evrik-platega') }}">{{ phrase('evrik_platega_payments') }}</a></xf:inforow>]]></template>
+  <template type="admin" title="evrik_platega_payments" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[<xf:title>{{ phrase('evrik_platega_payments') }}</xf:title>
+<xf:form action="{{ link('evrik-platega') }}" method="get" class="block">
+    <div class="block-container"><div class="block-body">
+        <xf:textboxrow name="search" value="{$search}" label="{{ phrase('evrik_platega_search') }}" />
+        <xf:submitrow submit="{{ phrase('evrik_platega_search_button') }}" />
+    </div></div>
+</xf:form>
+<div class="block"><div class="block-container"><div class="block-body">
+    <xf:if is="$invoices">
+        <div class="block-body block-body--scrollable">
+        <table class="dataList"><thead><tr class="dataList-row dataList-row--header">
+            <th class="dataList-cell">{{ phrase('evrik_platega_request_key') }}</th>
+            <th class="dataList-cell">{{ phrase('evrik_platega_transaction_id') }}</th>
+            <th class="dataList-cell">{{ phrase('evrik_platega_amount') }}</th>
+            <th class="dataList-cell">{{ phrase('evrik_platega_local_status') }}</th>
+            <th class="dataList-cell">{{ phrase('evrik_platega_date') }}</th>
+        </tr></thead><tbody>
+        <xf:foreach loop="$invoices" value="$invoice">
+            <tr class="dataList-row">
+                <td class="dataList-cell"><code>{$invoice.request_key}</code></td>
+                <td class="dataList-cell">{$invoice.transaction_id}</td>
+                <td class="dataList-cell">{{ number($invoice.amount_minor / 100, 2) }} {$invoice.currency}</td>
+                <td class="dataList-cell">{$invoice.status}</td>
+                <td class="dataList-cell"><xf:date time="{$invoice.created_date}" /></td>
+            </tr>
+        </xf:foreach>
+        </tbody></table></div>
+    <xf:else />
+        <div class="block-row">{{ phrase('evrik_platega_empty') }}</div>
+    </xf:if>
+</div></div>
+<xf:pagenav page="$page" perpage="$perPage" total="$total" link="evrik-platega" params="{{ {'search': $search} }}" wrapperclass="block-outer" />
+</div>
+<xf:form action="{{ link('evrik-platega/check') }}" class="block">
+    <div class="block-container"><h2 class="block-header">{{ phrase('evrik_platega_manual_check') }}</h2><div class="block-body">
+        <xf:inforow>{{ phrase('evrik_platega_manual_intro') }}</xf:inforow>
+        <xf:textboxrow name="request_key" required="true" maxlength="32" label="{{ phrase('evrik_platega_request_key') }}" />
+        <xf:textboxrow name="transaction_id" maxlength="36" label="{{ phrase('evrik_platega_transaction_id') }}" explain="{{ phrase('evrik_platega_transaction_help') }}" />
+        <xf:submitrow submit="{{ phrase('evrik_platega_manual_check') }}" />
+    </div></div>
+</xf:form>
+<xf:if is="$profiles is not empty">
+<xf:form action="{{ link('evrik-platega/connection') }}" class="block">
+    <div class="block-container"><h2 class="block-header">{{ phrase('evrik_platega_connection') }}</h2><div class="block-body">
+        <xf:selectrow name="payment_profile_id" label="{{ phrase('evrik_platega_profile') }}">
+            <xf:foreach loop="$profiles" value="$profile"><xf:option value="{$profile.payment_profile_id}">{$profile.title}</xf:option></xf:foreach>
+        </xf:selectrow>
+        <xf:inforow>{{ phrase('evrik_platega_connection_note') }}</xf:inforow>
+        <xf:submitrow submit="{{ phrase('evrik_platega_connection') }}" />
+    </div></div>
+</xf:form>
+</xf:if>]]></template>
+  <template type="admin" title="evrik_platega_result" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[<xf:title>{{ phrase('evrik_platega_result') }}</xf:title>
+<div class="block"><div class="block-container"><div class="block-body">
+    <div class="block-row"><xf:if is="$failed">{{ phrase('evrik_platega_result_failed') }}<xf:else />{{ phrase('evrik_platega_result_ok') }}</xf:if></div>
+    <xf:formrow label="{{ phrase('evrik_platega_request_key') }}"><code>{$requestKey}</code></xf:formrow>
+    <xf:formrow label="{{ phrase('evrik_platega_remote_status') }}">{$remoteStatus}</xf:formrow>
+    <div class="block-row">{$message}</div>
+    <div class="block-row"><xf:button href="{{ link('evrik-platega') }}">{{ phrase('evrik_platega_back') }}</xf:button></div>
+</div></div></div>]]></template>
 </templates>

@@ -25,4 +25,28 @@
   <phrase title="evrik_platega_rub_only" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Для оплаты через Platega укажите стоимость покупки в RUB.]]></phrase>
   <phrase title="evrik_platega_secret" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Secret key]]></phrase>
   <phrase title="evrik_platega_secret_explain" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Ключ из кабинета Platega. Хранится в настройках платёжного профиля; доступен администраторам с правом управления профилями.]]></phrase>
+  <phrase title="admin_navigation.evrikPlatega" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[Платежи Platega]]></phrase>
+  <phrase title="evrik_platega_payments" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[Платежи Platega]]></phrase>
+  <phrase title="evrik_platega_search" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[Ключ покупки или ID транзакции]]></phrase>
+  <phrase title="evrik_platega_search_button" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[Найти]]></phrase>
+  <phrase title="evrik_platega_connection" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[Проверить подключение]]></phrase>
+  <phrase title="evrik_platega_connection_ok" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[Platega доступна. Ключи профиля приняты API.]]></phrase>
+  <phrase title="evrik_platega_connection_failed" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[Не удалось проверить подключение. Проверьте ключи сохранённого профиля и доступ сервера к app.platega.io.]]></phrase>
+  <phrase title="evrik_platega_manual_failed" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[Не удалось обработать платёж. Проверьте журнал ошибок и повторите проверку после устранения причины.]]></phrase>
+  <phrase title="evrik_platega_manual_intro" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[Проверка запрашивает текущий статус в Platega. Подтверждённая оплата выдаёт покупку, возврат отзывает её. Повторная проверка уже обработанного платежа не выдаёт покупку снова.]]></phrase>
+  <phrase title="evrik_platega_manual_check" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[Проверить и обработать]]></phrase>
+  <phrase title="evrik_platega_request_key" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[Ключ покупки]]></phrase>
+  <phrase title="evrik_platega_transaction_id" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[ID транзакции Platega]]></phrase>
+  <phrase title="evrik_platega_transaction_help" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[Оставьте пустым, если ID уже сохранён. Для платежа без сохранённого ID скопируйте его из кабинета Platega: принадлежность покупке будет проверена через API.]]></phrase>
+  <phrase title="evrik_platega_local_status" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[Статус на форуме]]></phrase>
+  <phrase title="evrik_platega_remote_status" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[Статус в Platega]]></phrase>
+  <phrase title="evrik_platega_amount" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[Сумма]]></phrase>
+  <phrase title="evrik_platega_date" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[Создан]]></phrase>
+  <phrase title="evrik_platega_empty" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[Платежей не найдено.]]></phrase>
+  <phrase title="evrik_platega_result" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[Результат проверки]]></phrase>
+  <phrase title="evrik_platega_result_failed" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[Изменения не применены. Причина указана ниже.]]></phrase>
+  <phrase title="evrik_platega_result_ok" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[Проверка завершена.]]></phrase>
+  <phrase title="evrik_platega_back" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[К списку платежей]]></phrase>
+  <phrase title="evrik_platega_profile" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[Платёжный профиль]]></phrase>
+  <phrase title="evrik_platega_connection_note" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[Проверка читает служебный ответ API. Она не создаёт оплату и не проверяет доставку уведомлений на форум.]]></phrase>
 </phrases>

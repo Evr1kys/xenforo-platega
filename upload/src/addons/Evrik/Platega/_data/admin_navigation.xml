@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<admin_navigation>
+  <admin_navigation_entry navigation_id="evrikPlatega" parent_navigation_id="serviceProviders" display_order="210" link="evrik-platega" admin_permission_id="payment" debug_only="0" development_only="0" hide_no_children="0"/>
+</admin_navigation>

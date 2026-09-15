@@ -35,6 +35,19 @@ class Client
         return $this->request('GET', '/transaction/' . $id);
     }
 
+    public function checkConnection()
+    {
+        $balances = $this->request('GET', '/balance/all');
+        foreach ($balances as $balance)
+        {
+            if (!is_array($balance) || !isset($balance['currency'], $balance['amount'])
+                || !is_string($balance['currency']) || !is_numeric($balance['amount']))
+            {
+                throw new \RuntimeException('Invalid Platega connection check response.');
+            }
+        }
+    }
+
     protected function request($method, $path, ?array $data = null)
     {
         $options = [
