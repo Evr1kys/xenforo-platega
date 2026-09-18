@@ -46,6 +46,23 @@ final class Protocol
         return $value;
     }
 
+    public static function createResult(array $response)
+    {
+        $id = $response['transactionId'] ?? null;
+        if (!self::uuid($id))
+        {
+            throw new \UnexpectedValueException('Invalid transaction ID.');
+        }
+        if (isset($response['status']) && $response['status'] !== 'PENDING')
+        {
+            throw new \UnexpectedValueException('Unexpected transaction status.');
+        }
+        return [
+            'transaction_id' => strtolower($id),
+            'redirect_url' => self::redirectUrl($response['redirect'] ?? $response['url'] ?? null)
+        ];
+    }
+
     public static function validateTransaction(array $remote, array $invoice)
     {
         if (!isset($remote['id'], $remote['payload'], $remote['status'], $remote['paymentDetails'])
@@ -61,7 +78,6 @@ final class Protocol
         }
     }
 
-    // A refund is terminal. A late confirmation must never restore the purchase.
     public static function action($previous, $current)
     {
         if ($previous === 'CHARGEBACKED' || $previous === $current)
