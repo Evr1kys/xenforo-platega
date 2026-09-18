@@ -9,7 +9,7 @@
   <phrase title="evrik_platega_invalid_amount" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Некорректная сумма платежа. Укажите положительную сумму с точностью до копеек.]]></phrase>
   <phrase title="evrik_platega_invalid_merchant" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Введите Merchant ID в формате UUID.]]></phrase>
   <phrase title="evrik_platega_invalid_method" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Выберите доступный способ оплаты.]]></phrase>
-  <phrase title="evrik_platega_invalid_secret" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Введите Secret key без пробелов и управляющих символов.]]></phrase>
+  <phrase title="evrik_platega_invalid_secret" version_id="1000033" version_string="1.0.0 Beta 3"><![CDATA[Введите Secret key без пробелов и управляющих символов, длиной не более 512 символов.]]></phrase>
   <phrase title="evrik_platega_live_only" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Platega поддерживает только разовые реальные платежи. Проверьте enableLivePayments и отключите автопродление покупки.]]></phrase>
   <phrase title="evrik_platega_merchant" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Merchant ID]]></phrase>
   <phrase title="evrik_platega_method" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Способ оплаты]]></phrase>
@@ -21,7 +21,7 @@
   <phrase title="evrik_platega_method_3" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[ЕРИП]]></phrase>
   <phrase title="evrik_platega_method_auto" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Выбор на странице Platega]]></phrase>
   <phrase title="evrik_platega_method_explain" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Способ должен быть подключён к вашему магазину Platega. Валюта покупки — RUB.]]></phrase>
-  <phrase title="evrik_platega_notice" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Разовые платежи в RUB. Автосписания не поддерживаются. При создании платежа Platega получает ID и имя пользователя форума.]]></phrase>
+  <phrase title="evrik_platega_notice" version_id="1000033" version_string="1.0.0 Beta 3"><![CDATA[Разовые платежи в RUB. Автосписания не поддерживаются. Для проведения и антифрод-проверки Platega получает ID, имя пользователя и IP-адрес покупателя.]]></phrase>
   <phrase title="evrik_platega_rub_only" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Для оплаты через Platega укажите стоимость покупки в RUB.]]></phrase>
   <phrase title="evrik_platega_secret" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Secret key]]></phrase>
   <phrase title="evrik_platega_secret_explain" version_id="1000031" version_string="1.0.0 Beta 1"><![CDATA[Ключ из кабинета Platega. Хранится в настройках платёжного профиля; доступен администраторам с правом управления профилями.]]></phrase>
@@ -49,4 +49,11 @@
   <phrase title="evrik_platega_back" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[К списку платежей]]></phrase>
   <phrase title="evrik_platega_profile" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[Платёжный профиль]]></phrase>
   <phrase title="evrik_platega_connection_note" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[Проверка читает служебный ответ API. Она не создаёт оплату и не проверяет доставку уведомлений на форум.]]></phrase>
+  <phrase title="evrik_platega_filters" version_id="1000033" version_string="1.0.0 Beta 3"><![CDATA[Фильтры]]></phrase>
+  <phrase title="evrik_platega_filter_status" version_id="1000033" version_string="1.0.0 Beta 3"><![CDATA[Статус]]></phrase>
+  <phrase title="evrik_platega_filter_profile" version_id="1000033" version_string="1.0.0 Beta 3"><![CDATA[Платёжный профиль]]></phrase>
+  <phrase title="evrik_platega_all" version_id="1000033" version_string="1.0.0 Beta 3"><![CDATA[Все]]></phrase>
+  <phrase title="evrik_platega_summary" version_id="1000033" version_string="1.0.0 Beta 3"><![CDATA[Сводка по статусам]]></phrase>
+  <phrase title="evrik_platega_updated" version_id="1000033" version_string="1.0.0 Beta 3"><![CDATA[Обновлён]]></phrase>
+  <phrase title="evrik_platega_open_manual" version_id="1000033" version_string="1.0.0 Beta 3"><![CDATA[Подставить платёж в форму ручной проверки]]></phrase>
 </phrases>
