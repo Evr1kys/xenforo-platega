@@ -18,30 +18,54 @@
 <xf:textboxrow value="{$callbackUrl}" readonly="true"
     label="{{ phrase('evrik_platega_callback') }}" explain="{{ phrase('evrik_platega_callback_explain') }}" />
 <xf:inforow><a href="{{ link('evrik-platega') }}">{{ phrase('evrik_platega_payments') }}</a></xf:inforow>]]></template>
-  <template type="admin" title="evrik_platega_payments" version_id="1000032" version_string="1.0.0 Beta 2"><![CDATA[<xf:title>{{ phrase('evrik_platega_payments') }}</xf:title>
+  <template type="admin" title="evrik_platega_payments" version_id="1000033" version_string="1.0.0 Beta 3"><![CDATA[<xf:title>{{ phrase('evrik_platega_payments') }}</xf:title>
 <xf:form action="{{ link('evrik-platega') }}" method="get" class="block">
-    <div class="block-container"><div class="block-body">
+    <div class="block-container"><h2 class="block-header">{{ phrase('evrik_platega_filters') }}</h2><div class="block-body">
         <xf:textboxrow name="search" value="{$search}" label="{{ phrase('evrik_platega_search') }}" />
+        <xf:selectrow name="status" value="{$status}" label="{{ phrase('evrik_platega_filter_status') }}">
+            <xf:option value="">{{ phrase('evrik_platega_all') }}</xf:option>
+            <xf:foreach loop="$statuses" value="$statusOption">
+                <xf:option value="{$statusOption}">{$statusOption}</xf:option>
+            </xf:foreach>
+        </xf:selectrow>
+        <xf:selectrow name="profile" value="{$profileId}" label="{{ phrase('evrik_platega_filter_profile') }}">
+            <xf:option value="0">{{ phrase('evrik_platega_all') }}</xf:option>
+            <xf:foreach loop="$profiles" value="$profile">
+                <xf:option value="{$profile.payment_profile_id}">{$profile.title}</xf:option>
+            </xf:foreach>
+        </xf:selectrow>
         <xf:submitrow submit="{{ phrase('evrik_platega_search_button') }}" />
     </div></div>
 </xf:form>
+<div class="block"><div class="block-container">
+    <h2 class="block-header">{{ phrase('evrik_platega_summary') }}</h2>
+    <div class="block-body"><div class="block-row">
+        <xf:foreach loop="$summary" key="$summaryStatus" value="$summaryTotal">
+            <a href="{{ link('evrik-platega', null, {'status': $summaryStatus}) }}" class="label label--subtle">{$summaryStatus}: {{ number($summaryTotal) }}</a>
+        </xf:foreach>
+    </div></div>
+</div></div>
 <div class="block"><div class="block-container"><div class="block-body">
     <xf:if is="$invoices">
         <div class="block-body block-body--scrollable">
         <table class="dataList"><thead><tr class="dataList-row dataList-row--header">
             <th class="dataList-cell">{{ phrase('evrik_platega_request_key') }}</th>
             <th class="dataList-cell">{{ phrase('evrik_platega_transaction_id') }}</th>
+            <th class="dataList-cell">{{ phrase('evrik_platega_profile') }}</th>
             <th class="dataList-cell">{{ phrase('evrik_platega_amount') }}</th>
             <th class="dataList-cell">{{ phrase('evrik_platega_local_status') }}</th>
             <th class="dataList-cell">{{ phrase('evrik_platega_date') }}</th>
+            <th class="dataList-cell">{{ phrase('evrik_platega_updated') }}</th>
         </tr></thead><tbody>
         <xf:foreach loop="$invoices" value="$invoice">
             <tr class="dataList-row">
-                <td class="dataList-cell"><code>{$invoice.request_key}</code></td>
+                <td class="dataList-cell"><a href="{{ link('evrik-platega', null, {'request_key': $invoice.request_key, 'transaction_id': $invoice.transaction_id}) }}#manual-check" title="{{ phrase('evrik_platega_open_manual') }}"><code>{$invoice.request_key}</code></a></td>
                 <td class="dataList-cell">{$invoice.transaction_id}</td>
+                <td class="dataList-cell">{$invoice.profile_title}</td>
                 <td class="dataList-cell">{{ number($invoice.amount_minor / 100, 2) }} {$invoice.currency}</td>
                 <td class="dataList-cell">{$invoice.status}</td>
                 <td class="dataList-cell"><xf:date time="{$invoice.created_date}" /></td>
+                <td class="dataList-cell"><xf:date time="{$invoice.updated_date}" /></td>
             </tr>
         </xf:foreach>
         </tbody></table></div>
@@ -49,13 +73,14 @@
         <div class="block-row">{{ phrase('evrik_platega_empty') }}</div>
     </xf:if>
 </div></div>
-<xf:pagenav page="$page" perpage="$perPage" total="$total" link="evrik-platega" params="{{ {'search': $search} }}" wrapperclass="block-outer" />
+<xf:pagenav page="$page" perpage="$perPage" total="$total" link="evrik-platega"
+    params="{{ {'search': $search, 'status': $status, 'profile': $profileId} }}" wrapperclass="block-outer" />
 </div>
-<xf:form action="{{ link('evrik-platega/check') }}" class="block">
+<xf:form action="{{ link('evrik-platega/check') }}" class="block" id="manual-check">
     <div class="block-container"><h2 class="block-header">{{ phrase('evrik_platega_manual_check') }}</h2><div class="block-body">
         <xf:inforow>{{ phrase('evrik_platega_manual_intro') }}</xf:inforow>
-        <xf:textboxrow name="request_key" required="true" maxlength="32" label="{{ phrase('evrik_platega_request_key') }}" />
-        <xf:textboxrow name="transaction_id" maxlength="36" label="{{ phrase('evrik_platega_transaction_id') }}" explain="{{ phrase('evrik_platega_transaction_help') }}" />
+        <xf:textboxrow name="request_key" value="{$manualRequestKey}" required="true" maxlength="32" label="{{ phrase('evrik_platega_request_key') }}" />
+        <xf:textboxrow name="transaction_id" value="{$manualTransactionId}" maxlength="36" label="{{ phrase('evrik_platega_transaction_id') }}" explain="{{ phrase('evrik_platega_transaction_help') }}" />
         <xf:submitrow submit="{{ phrase('evrik_platega_manual_check') }}" />
     </div></div>
 </xf:form>
