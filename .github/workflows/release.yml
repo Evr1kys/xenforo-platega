@@ -1,26 +1,23 @@
 name: Release
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
+
 permissions:
   contents: write
+
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.3'
-          coverage: none
-      - name: Validate release tag
-        env:
-          RELEASE_TAG: ${{ github.ref_name }}
+
+      - name: Resolve add-on version
+        id: version
         run: |
           python3 - <<'PY'
           import json
-          import os
           import re
           from pathlib import Path
 
@@ -28,26 +25,57 @@ jobs:
           match = re.fullmatch(r'(\d+\.\d+\.\d+) Beta (\d+)', meta['version_string'])
           if not match:
               raise SystemExit('Unsupported version_string for release workflow')
-          expected = f'v{match.group(1)}-beta.{match.group(2)}'
-          if os.environ['RELEASE_TAG'] != expected:
-              raise SystemExit(f'Release tag must be {expected}, got {os.environ["RELEASE_TAG"]}')
-          print(f'Release tag matches add-on version: {expected}')
+          tag = f'v{match.group(1)}-beta.{match.group(2)}'
+          with open(Path.home() / 'version-output.txt', 'w') as target:
+              target.write(tag)
+          print(f'Resolved release tag: {tag}')
           PY
+          echo "tag=$(cat "$HOME/version-output.txt")" >> "$GITHUB_OUTPUT"
+
+      - name: Check whether release already exists
+        id: existing
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Release $RELEASE_TAG already exists; nothing to publish."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: shivammathur/setup-php@v2
+        if: steps.existing.outputs.exists != 'true'
+        with:
+          php-version: '8.3'
+          coverage: none
+
       - name: Validate source
+        if: steps.existing.outputs.exists != 'true'
         run: |
           find upload tests scripts -name '*.php' -print0 | xargs -0 -n1 php -l
           php tests/protocol.php
           python3 scripts/check-package.py
-      - name: Build release archive
+
+      - name: Build and validate release archive
+        if: steps.existing.outputs.exists != 'true'
         run: |
           python3 scripts/build.py
           python3 scripts/check-archive.py
-      - name: Publish GitHub release
+          first="$(sha256sum dist/Evrik-Platega-*.zip | cut -d' ' -f1)"
+          python3 scripts/build.py
+          second="$(sha256sum dist/Evrik-Platega-*.zip | cut -d' ' -f1)"
+          test "$first" = "$second"
+          python3 scripts/check-archive.py
+
+      - name: Publish GitHub release and tag
+        if: steps.existing.outputs.exists != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
         run: |
-          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" dist/* --clobber
-          else
-            gh release create "$GITHUB_REF_NAME" dist/* --verify-tag --generate-notes --title "$GITHUB_REF_NAME"
-          fi
+          gh release create "$RELEASE_TAG" dist/* \
+            --target "$GITHUB_SHA" \
+            --generate-notes \
+            --title "$RELEASE_TAG"
