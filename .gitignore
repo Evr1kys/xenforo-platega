@@ -6,4 +6,6 @@
 !.env.example
 .DS_Store
 *.log
+__pycache__/
+*.py[cod]
 /upload/src/addons/Evrik/Platega/hashes.json
