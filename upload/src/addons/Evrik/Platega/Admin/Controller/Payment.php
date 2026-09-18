@@ -2,11 +2,16 @@
 
 namespace Evrik\Platega\Admin\Controller;
 
+use Evrik\Platega\Api\Protocol;
 use Evrik\Platega\Payment\Platega;
 use XF\Mvc\ParameterBag;
 
 class Payment extends \XF\Admin\Controller\AbstractController
 {
+    protected static $statuses = [
+        'CREATING', 'UNCERTAIN', 'PENDING', 'CONFIRMED', 'CANCELED', 'CHARGEBACKED'
+    ];
+
     protected function preDispatchController($action, ParameterBag $params)
     {
         $this->assertAdminPermission('payment');
@@ -17,21 +22,87 @@ class Payment extends \XF\Admin\Controller\AbstractController
         $page = max(1, $this->filterPage());
         $perPage = 30;
         $search = trim($this->filter('search', 'str'));
-        $where = '';
+        $status = strtoupper(trim($this->filter('status', 'str')));
+        $profileId = $this->filter('profile', 'uint');
+        if (!in_array($status, self::$statuses, true))
+        {
+            $status = '';
+        }
+
+        $where = [];
         $bind = [];
         if ($search !== '')
         {
-            $where = ' WHERE request_key = ? OR transaction_id = ?';
-            $bind = [$search, $search];
+            $where[] = '(request_key = ? OR transaction_id = ?)';
+            $bind[] = $search;
+            $bind[] = $search;
         }
-        $total = (int)\XF::db()->fetchOne('SELECT COUNT(*) FROM ' . Platega::TABLE . $where, $bind);
+        if ($status !== '')
+        {
+            $where[] = 'status = ?';
+            $bind[] = $status;
+        }
+        if ($profileId)
+        {
+            $where[] = 'payment_profile_id = ?';
+            $bind[] = $profileId;
+        }
+        $whereSql = $where ? ' WHERE ' . implode(' AND ', $where) : '';
+
+        $db = \XF::db();
+        $total = (int)$db->fetchOne('SELECT COUNT(*) FROM ' . Platega::TABLE . $whereSql, $bind);
         $page = min($page, max(1, (int)ceil($total / $perPage)));
-        $invoices = \XF::db()->fetchAll('SELECT * FROM ' . Platega::TABLE . $where
-            . ' ORDER BY created_date DESC, request_key LIMIT ' . $perPage . ' OFFSET ' . (($page - 1) * $perPage), $bind);
+        $invoices = $db->fetchAll('SELECT * FROM ' . Platega::TABLE . $whereSql
+            . ' ORDER BY created_date DESC, request_key LIMIT ' . $perPage
+            . ' OFFSET ' . (($page - 1) * $perPage), $bind);
+
         $profiles = $this->finder('XF:PaymentProfile')->where('provider_id', 'evrikPlatega')->fetch();
+        $profileTitles = [];
+        foreach ($profiles as $profile)
+        {
+            $profileTitles[$profile->payment_profile_id] = $profile->title;
+        }
+        foreach ($invoices as &$invoice)
+        {
+            $invoice['profile_title'] = $profileTitles[$invoice['payment_profile_id']]
+                ?? ('#' . $invoice['payment_profile_id']);
+        }
+        unset($invoice);
+
+        $summary = [];
+        foreach (self::$statuses as $knownStatus)
+        {
+            $summary[$knownStatus] = 0;
+        }
+        foreach ($db->fetchAll('SELECT status, COUNT(*) AS total FROM ' . Platega::TABLE . ' GROUP BY status') as $row)
+        {
+            $summary[$row['status']] = (int)$row['total'];
+        }
+
+        $manualRequestKey = trim($this->filter('request_key', 'str'));
+        if (!preg_match('/\A[a-zA-Z0-9]{32}\z/', $manualRequestKey))
+        {
+            $manualRequestKey = '';
+        }
+        $manualTransactionId = trim($this->filter('transaction_id', 'str'));
+        if (!Protocol::uuid($manualTransactionId))
+        {
+            $manualTransactionId = '';
+        }
+
         return $this->view('Evrik\Platega:Payment\Listing', 'evrik_platega_payments', [
-            'invoices' => $invoices, 'profiles' => $profiles,
-            'page' => $page, 'perPage' => $perPage, 'total' => $total, 'search' => $search
+            'invoices' => $invoices,
+            'profiles' => $profiles,
+            'summary' => $summary,
+            'statuses' => self::$statuses,
+            'page' => $page,
+            'perPage' => $perPage,
+            'total' => $total,
+            'search' => $search,
+            'status' => $status,
+            'profileId' => $profileId,
+            'manualRequestKey' => $manualRequestKey,
+            'manualTransactionId' => $manualTransactionId
         ]);
     }
 

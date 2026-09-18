@@ -2,6 +2,7 @@
 
 namespace Evrik\Platega;
 
+use XF\Db\Schema\Alter;
 use XF\Db\Schema\Create;
 
 class Setup extends \XF\AddOn\AbstractSetup
@@ -21,18 +22,33 @@ class Setup extends \XF\AddOn\AbstractSetup
             $table->addColumn('updated_date', 'int')->unsigned();
             $table->addPrimaryKey('request_key');
             $table->addUniqueKey('transaction_id');
+            $this->addInvoiceIndexes($table);
         });
         $this->registerProvider();
     }
 
     public function upgrade(array $stepParams = [])
     {
+        if ($this->addOn->version_id < 1000033)
+        {
+            $this->schemaManager()->alterTable('xf_evrik_platega_invoice', function (Alter $table)
+            {
+                $this->addInvoiceIndexes($table);
+            });
+        }
         $this->registerProvider();
     }
 
     public function postRebuild()
     {
         $this->registerProvider();
+    }
+
+    protected function addInvoiceIndexes($table)
+    {
+        $table->addKey(['created_date'], 'created_date');
+        $table->addKey(['status', 'created_date'], 'status_created');
+        $table->addKey(['payment_profile_id', 'created_date'], 'profile_created');
     }
 
     protected function registerProvider()

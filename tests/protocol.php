@@ -40,6 +40,24 @@ foreach (['http://pay.platega.io', '//pay.platega.io', 'javascript:alert(1)', 'h
     rejects(function () use ($url) { Protocol::redirectUrl($url); }, 'unsafe URL');
 }
 check(Protocol::redirectUrl('https://pay.platega.io/?id=123') === 'https://pay.platega.io/?id=123', 'HTTPS payment URL');
+$created = Protocol::createResult([
+    'transactionId' => strtoupper($id),
+    'status' => 'PENDING',
+    'url' => 'https://pay.platega.io/?id=123'
+]);
+check($created['transaction_id'] === $id, 'created transaction ID normalized');
+check($created['redirect_url'] === 'https://pay.platega.io/?id=123', 'created URL accepted');
+$created = Protocol::createResult(['transactionId' => $id, 'redirect' => 'https://pay.platega.io/redirect']);
+check($created['redirect_url'] === 'https://pay.platega.io/redirect', 'legacy redirect accepted');
+foreach ([
+    ['transactionId' => 'bad', 'url' => 'https://pay.platega.io/'],
+    ['transactionId' => $id, 'status' => 'CONFIRMED', 'url' => 'https://pay.platega.io/'],
+    ['transactionId' => $id, 'status' => 'PENDING', 'url' => 'http://pay.platega.io/'],
+    ['transactionId' => $id, 'status' => 'PENDING']
+] as $response)
+{
+    rejects(function () use ($response) { Protocol::createResult($response); }, 'invalid create response');
+}
 $invoice = ['transaction_id' => $id, 'request_key' => str_repeat('a', 32), 'amount_minor' => 10050, 'currency' => 'RUB'];
 $remote = ['id' => $id, 'payload' => $invoice['request_key'], 'status' => 'CONFIRMED', 'paymentDetails' => ['amount' => 100.50, 'currency' => 'RUB']];
 Protocol::validateTransaction($remote, $invoice);
