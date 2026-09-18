@@ -14,6 +14,7 @@ use XF\Purchasable\Purchase;
 class Platega extends \XF\Payment\AbstractProvider
 {
     const TABLE = 'xf_evrik_platega_invoice';
+    const MAX_SECRET_LENGTH = 512;
 
     public function getTitle()
     {
@@ -35,14 +36,15 @@ class Platega extends \XF\Payment\AbstractProvider
 
     public function verifyConfig(array &$options, &$errors = [])
     {
-        $options['merchant_id'] = trim((string)($options['merchant_id'] ?? ''));
+        $options['merchant_id'] = strtolower(trim((string)($options['merchant_id'] ?? '')));
         $options['secret'] = trim((string)($options['secret'] ?? ''));
         $method = (string)($options['payment_method'] ?? '0');
         if (!Protocol::uuid($options['merchant_id']))
         {
             $errors[] = \XF::phrase('evrik_platega_invalid_merchant');
         }
-        if (!$options['secret'] || preg_match('/[\x00-\x20\x7f]/', $options['secret']))
+        if (!$options['secret'] || strlen($options['secret']) > self::MAX_SECRET_LENGTH
+            || preg_match('/[\x00-\x20\x7f]/', $options['secret']))
         {
             $errors[] = \XF::phrase('evrik_platega_invalid_secret');
         }
@@ -99,17 +101,29 @@ class Platega extends \XF\Payment\AbstractProvider
             {
                 return $controller->error(\XF::phrase('evrik_platega_invalid_amount'));
             }
+            $metadata = [
+                'userId' => (string)$purchaseRequest->user_id,
+                'userName' => (string)$purchase->purchaser->username
+            ];
+            try
+            {
+                $clientIp = $controller->request()->getIp();
+                if (is_string($clientIp) && filter_var($clientIp, FILTER_VALIDATE_IP))
+                {
+                    $metadata['clientIp'] = $clientIp;
+                }
+            }
+            catch (\Throwable $e)
+            {
+                // Payment remains available if a third-party controller/request does not expose an IP.
+            }
             $data = [
                 'paymentDetails' => ['amount' => $minor / 100, 'currency' => 'RUB'],
                 'description' => (string)$purchase->title,
                 'return' => Protocol::redirectUrl($purchase->returnUrl),
                 'failedUrl' => Protocol::redirectUrl($purchase->cancelUrl ?: $purchase->returnUrl),
                 'payload' => $key,
-                'orderId' => $key,
-                'metadata' => [
-                    'userId' => (string)$purchaseRequest->user_id,
-                    'userName' => (string)$purchase->purchaser->username
-                ]
+                'metadata' => $metadata
             ];
             $db->insert(self::TABLE, [
                 'request_key' => $key,
@@ -124,23 +138,18 @@ class Platega extends \XF\Payment\AbstractProvider
                 $response = $this->client($purchase->paymentProfile)->create(
                     $data, (int)($purchase->paymentProfile->options['payment_method'] ?? 0)
                 );
-                if (!Protocol::uuid($response['transactionId'] ?? null))
-                {
-                    throw new \UnexpectedValueException('Invalid transaction ID.');
-                }
-                $url = Protocol::redirectUrl($response['redirect'] ?? $response['url'] ?? null);
+                $created = Protocol::createResult($response);
                 $db->update(self::TABLE, [
-                    'transaction_id' => strtolower($response['transactionId']),
-                    'redirect_url' => $url,
+                    'transaction_id' => $created['transaction_id'],
+                    'redirect_url' => $created['redirect_url'],
                     'status' => 'PENDING',
                     'updated_date' => time()
                 ], 'request_key = ?', $key);
-                return $controller->redirect($url);
+                return $controller->redirect($created['redirect_url']);
             }
             catch (\Throwable $e)
             {
                 $db->update(self::TABLE, ['status' => 'UNCERTAIN', 'updated_date' => time()], 'request_key = ?', $key);
-                // Neither HTTP exceptions nor raw response bodies are safe to log.
                 \XF::logError('Platega: invoice creation needs review. Purchase request: ' . $key);
                 return $controller->error(\XF::phrase('evrik_platega_create_failed'));
             }
@@ -183,7 +192,6 @@ class Platega extends \XF\Payment\AbstractProvider
         }
         elseif (is_string($payload) && preg_match('/\A[a-zA-Z0-9]{32}\z/', $payload))
         {
-            // Allows an authenticated callback to recover an ambiguous POST result.
             $state->requestKey = $payload;
             $state->invoice = \XF::db()->fetchRow(
                 'SELECT * FROM ' . self::TABLE . ' WHERE request_key = ?', $payload
@@ -287,7 +295,6 @@ class Platega extends \XF\Payment\AbstractProvider
         $this->client($profile)->checkConnection();
     }
 
-    // Called by the permission-protected admin controller; never by a public route.
     public function reconcile($requestKey, $transactionId = null)
     {
         $state = new State();
@@ -342,7 +349,6 @@ class Platega extends \XF\Payment\AbstractProvider
 
     public function validateTransaction(CallbackState $state)
     {
-        // Error/info logs are not proof of payment; use the locked invoice ledger.
         return true;
     }
 
@@ -363,7 +369,6 @@ class Platega extends \XF\Payment\AbstractProvider
 
     public function getPaymentResult(CallbackState $state)
     {
-        // Determined inside the row lock in completeTransaction().
     }
 
     public function completeTransaction(CallbackState $state)
@@ -387,7 +392,6 @@ class Platega extends \XF\Payment\AbstractProvider
                     ? CallbackState::PAYMENT_RECEIVED : CallbackState::PAYMENT_REVERSED;
                 parent::completeTransaction($state);
             }
-            // Cancellation cannot overwrite an applied confirmation or refund.
             if ($invoice['status'] !== 'CHARGEBACKED'
                 && !($invoice['status'] === 'CONFIRMED' && $current === 'CANCELED'))
             {
@@ -402,8 +406,6 @@ class Platega extends \XF\Payment\AbstractProvider
         catch (\Throwable $e)
         {
             $db->rollback();
-            // Let XenForo return an actual 5xx; its callback entrypoint does not
-            // re-read state->httpCode after completeTransaction().
             throw new \RuntimeException('Platega purchase processing failed. Callback can be retried.');
         }
     }
