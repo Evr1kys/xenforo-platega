@@ -1,10 +1,12 @@
+![Platega для XenForo — независимое дополнение Evrik](docs/assets/cover.svg)
+
 # Platega для XenForo
 
 [![Checks](https://github.com/Evr1kys/xenforo-platega/actions/workflows/checks.yml/badge.svg)](https://github.com/Evr1kys/xenforo-platega/actions/workflows/checks.yml)
 [![Release](https://img.shields.io/github/v/release/Evr1kys/xenforo-platega?include_prereleases)](https://github.com/Evr1kys/xenforo-platega/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Платёжный провайдер [Platega](https://platega.io) для XenForo 2.2 и 2.3. Добавляет оплату через стандартные платёжные профили форума: платные повышения пользователей и покупки в дополнениях, которые используют этот механизм.
+Независимое дополнение от [Evrik](https://github.com/Evr1kys) для приёма платежей через [Platega](https://platega.io) в XenForo 2.2 и 2.3. Это личная разработка, не официальный продукт Platega или XenForo. Добавляет оплату через стандартные платёжные профили форума: платные повышения пользователей и покупки в дополнениях, которые используют этот механизм.
 
 **[Скачать](https://github.com/Evr1kys/xenforo-platega/releases) · [Установка](docs/INSTALL.md) · [Архитектура](docs/ARCHITECTURE.md) · [Проверки](docs/TESTING.md) · [Сообщить об ошибке](https://github.com/Evr1kys/xenforo-platega/issues)**
 
@@ -22,7 +24,7 @@
 - Защита от повторной обработки, в том числе при одновременных уведомлениях.
 - Отмена выданной покупки после подтверждённого возврата `CHARGEBACKED`.
 - Журнал в стандартном разделе платежей XenForo. Ключи и полные ответы API в него не записываются.
-- Воспроизводимая сборка ZIP, проверка хешей содержимого и автоматическая публикация релизов по Git-тегу.
+- Воспроизводимая сборка ZIP, проверка хешей содержимого и автоматическая публикация релизов при обновлении версии в main.
 
 ## Совместимость
 
@@ -71,7 +73,7 @@ python3 scripts/check-archive.py
 
 Готовый ZIP и SHA-256 появятся в `dist/`. Сборка воспроизводима: повторный запуск с тем же исходным деревом создаёт архив с тем же SHA-256. Для интеграционных проверок нужна собственная лицензированная копия XenForo: исходники движка и данные форума в репозиторий не входят. См. [TESTING.md](docs/TESTING.md).
 
-Тег версии вида `v1.0.0-beta.3` запускает workflow `Release`: исходники проверяются, архив собирается и загружается в GitHub Releases вместе с контрольной суммой.
+После изменения версии дополнения в `main` workflow `Release` создаёт тег и предварительный релиз: исходники проверяются, архив собирается и загружается в GitHub Releases вместе с контрольной суммой.
 
 ## Лицензия
 

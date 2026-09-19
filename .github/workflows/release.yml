@@ -7,6 +7,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: platega-release
+  cancel-in-progress: false
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -77,5 +81,6 @@ jobs:
         run: |
           gh release create "$RELEASE_TAG" dist/* \
             --target "$GITHUB_SHA" \
+            --prerelease \
             --generate-notes \
             --title "$RELEASE_TAG"
