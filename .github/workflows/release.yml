@@ -22,19 +22,20 @@ jobs:
         run: |
           python3 - <<'PY'
           import json
+          import os
           import re
           from pathlib import Path
 
           meta = json.loads(Path('upload/src/addons/Evrik/Platega/addon.json').read_text())
-          match = re.fullmatch(r'(\d+\.\d+\.\d+) Beta (\d+)', meta['version_string'])
+          match = re.fullmatch(r'(\d+\.\d+\.\d+)(?: Beta (\d+))?', meta['version_string'])
           if not match:
               raise SystemExit('Unsupported version_string for release workflow')
-          tag = f'v{match.group(1)}-beta.{match.group(2)}'
-          with open(Path.home() / 'version-output.txt', 'w') as target:
-              target.write(tag)
+          beta = match.group(2)
+          tag = f'v{match.group(1)}' + (f'-beta.{beta}' if beta else '')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as target:
+              target.write(f'tag={tag}\nprerelease={str(bool(beta)).lower()}\n')
           print(f'Resolved release tag: {tag}')
           PY
-          echo "tag=$(cat "$HOME/version-output.txt")" >> "$GITHUB_OUTPUT"
 
       - name: Check whether release already exists
         id: existing
@@ -77,10 +78,12 @@ jobs:
         if: steps.existing.outputs.exists != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          PRERELEASE: ${{ steps.version.outputs.prerelease }}
           RELEASE_TAG: ${{ steps.version.outputs.tag }}
         run: |
-          gh release create "$RELEASE_TAG" dist/* \
+          flags=()
+          if [ "$PRERELEASE" = "true" ]; then flags+=(--prerelease); fi
+          gh release create "$RELEASE_TAG" dist/* "${flags[@]}" \
             --target "$GITHUB_SHA" \
-            --prerelease \
             --generate-notes \
             --title "$RELEASE_TAG"
