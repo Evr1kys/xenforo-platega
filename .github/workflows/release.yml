@@ -59,7 +59,7 @@ jobs:
       - name: Validate source
         if: steps.existing.outputs.exists != 'true'
         run: |
-          find upload tests scripts -name '*.php' -print0 | xargs -0 -n1 php -l
+          find upload legacy tests scripts -name '*.php' -print0 | xargs -0 -n1 php -l
           php tests/protocol.php
           python3 scripts/check-package.py
 

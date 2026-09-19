@@ -50,3 +50,20 @@ with zipfile.ZipFile(ARCHIVE) as source:
         assert actual == expected, f'Hash mismatch: {relative_path}'
 
 print(f'OK: {ARCHIVE.name} ({len(infos)} files, SHA-256 {archive_digest})')
+
+legacy_archive = ROOT / 'dist/Evrik-Platega-XF1-1000070.zip'
+digest = hashlib.sha256(legacy_archive.read_bytes()).hexdigest()
+assert legacy_archive.with_suffix('.zip.sha256').read_text() == digest + '  ' + legacy_archive.name + '\n'
+with zipfile.ZipFile(legacy_archive) as source:
+    expected_files = {p.relative_to(ROOT / 'legacy').as_posix(): p.read_bytes()
+        for p in (ROOT / 'legacy').rglob('*') if p.is_file()}
+    expected_files['LICENSE'] = (ROOT / 'LICENSE').read_bytes()
+    assert set(source.namelist()) == set(expected_files)
+    assert len(source.infolist()) == len(expected_files)
+    for entry in source.infolist():
+        assert source.read(entry) == expected_files[entry.filename]
+        assert entry.date_time == (2026, 1, 1, 0, 0, 0)
+        assert (entry.external_attr >> 16) & 0o170000 == stat.S_IFREG
+        assert '..' not in PurePosixPath(entry.filename).parts
+        assert not PurePosixPath(entry.filename).is_absolute()
+print(f'OK: {legacy_archive.name} (SHA-256 {digest})')

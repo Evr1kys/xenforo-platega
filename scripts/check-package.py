@@ -68,3 +68,19 @@ print(
     'OK: add-on metadata, required files, XML, versions, unique data IDs, '
     'phrase references and PHP source hygiene'
 )
+
+legacy = root.parents[4] / 'legacy'
+assert (legacy / 'upload/library/Evrik/Platega/Protocol.php').read_bytes() == (root / 'Api/Protocol.php').read_bytes(), 'Legacy protocol copy must match the shared implementation'
+legacy_xml = ET.parse(legacy / 'addon-EvrikPlategaLegacy.xml').getroot()
+assert legacy_xml.tag == 'addon' and legacy_xml.attrib['addon_id'] == 'EvrikPlategaLegacy'
+assert legacy_xml.attrib['version_id'] == '1000070'
+assert {x.attrib['hint'] for x in legacy_xml.find('code_event_listeners')} == {
+    'XenForo_ControllerPublic_Account', 'XenForo_DataWriter_UserUpgrade'}
+assert '_xfToken' in legacy_xml.find('templates/template').text
+print('OK: legacy installer, controller registration, CSRF field and shared protocol')
+
+expected_legacy_files = {'README.md', 'addon-EvrikPlategaLegacy.xml',
+    'upload/platega_callback.php', 'upload/platega_reconcile.php'}
+expected_legacy_files.update('upload/library/Evrik/Platega/' + name + '.php'
+    for name in ['Account', 'Client', 'Protocol', 'Service', 'Setup', 'UserUpgrade'])
+assert {p.relative_to(legacy).as_posix() for p in legacy.rglob('*') if p.is_file()} == expected_legacy_files

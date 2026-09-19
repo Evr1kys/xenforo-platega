@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<addon addon_id="EvrikPlategaLegacy" title="Platega payments for XenForo 1.5" version_string="1.0.0" version_id="1000070" url="https://github.com/Evr1kys/xenforo-platega" install_callback_class="Evrik_Platega_Setup" install_callback_method="install" uninstall_callback_class="Evrik_Platega_Setup" uninstall_callback_method="uninstall">
+  <admin_navigation />
+  <admin_permissions />
+  <admin_templates />
+  <admin_template_modifications>
+    <modification template="user_upgrade_edit" modification_key="evrik_platega_rub" description="RUB currency" execution_order="10" enabled="1" action="str_replace">
+      <find><![CDATA[<xen:option value="eur">EUR</xen:option>]]></find>
+      <replace><![CDATA[$0<xen:option value="rub">RUB</xen:option>]]></replace>
+    </modification>
+  </admin_template_modifications>
+  <code_events />
+  <cron />
+  <email_templates />
+  <email_template_modifications />
+  <optiongroups />
+  <permissions />
+  <phrases />
+  <route_prefixes />
+  <style_properties />
+  <admin_style_properties />
+  <bb_code_media_sites />
+  <bb_codes />
+  <code_event_listeners>
+    <listener event_id="load_class_controller" execute_order="10" callback_class="Evrik_Platega_Setup" callback_method="loadAccount" active="1" hint="XenForo_ControllerPublic_Account" description="Platega account upgrades" />
+    <listener event_id="load_class_datawriter" execute_order="10" callback_class="Evrik_Platega_Setup" callback_method="loadAccount" active="1" hint="XenForo_DataWriter_UserUpgrade" description="RUB upgrades" />
+  </code_event_listeners>
+  <templates>
+    <template title="evrik_platega_legacy" version_id="1000070" version_string="1.0.0"><![CDATA[
+<xen:title>Оплата через Platega</xen:title>
+<xen:if is="{$available}">
+<xen:foreach loop="$available" value="$upgrade">
+<form action="{xen:link account/platega}" method="post" class="section primaryContent">
+<h3>{$upgrade.title}</h3>
+<p>{$upgrade.costPhrase}</p>
+<input type="hidden" name="user_upgrade_id" value="{$upgrade.user_upgrade_id}" />
+<input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
+<input type="submit" value="Оплатить через Platega" class="button primary" />
+</form>
+</xen:foreach>
+<xen:else />
+<p class="importantMessage">Нет доступных разовых повышений в RUB.</p>
+</xen:if>
+    ]]></template>
+  </templates>
+  <public_template_modifications>
+    <modification template="account_upgrades" modification_key="evrik_platega_link" description="Platega payment link" execution_order="10" enabled="1" action="str_replace">
+      <find><![CDATA[<xen:require css="account_upgrades.css" />]]></find>
+      <replace><![CDATA[$0
+<p class="section"><a href="{xen:link account/platega}" class="button">Оплата через Platega</a></p>]]></replace>
+    </modification>
+    <modification template="account_upgrades" modification_key="evrik_platega_rub_checkout" description="Use Platega for RUB upgrades" execution_order="20" enabled="1" action="preg_replace">
+      <find><![CDATA[#(<form action="\{\$payPalUrl\}"[\s\S]*?</form>)#]]></find>
+      <replace><![CDATA[<xen:if is="{$upgrade.currency} != 'RUB'">$1<xen:else /><a href="{xen:link account/platega}" class="button">Оплатить через Platega</a></xen:if>]]></replace>
+    </modification>
+  </public_template_modifications>
+</addon>

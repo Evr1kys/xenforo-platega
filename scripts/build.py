@@ -26,3 +26,18 @@ with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED) as target:
 checksum = hashlib.sha256(archive.read_bytes()).hexdigest()
 (dist / (archive.name + '.sha256')).write_text(checksum + '  ' + archive.name + '\n')
 print(archive)
+
+# XenForo 1.x uses an XML installer and a different upload layout.
+legacy = ROOT / 'legacy'
+legacy_files = sorted(p for p in legacy.rglob('*') if p.is_file())
+legacy_archive = dist / 'Evrik-Platega-XF1-1000070.zip'
+with zipfile.ZipFile(legacy_archive, 'w', zipfile.ZIP_DEFLATED) as target:
+    for p in legacy_files + [ROOT / 'LICENSE']:
+        name = 'LICENSE' if p == ROOT / 'LICENSE' else p.relative_to(legacy).as_posix()
+        entry = zipfile.ZipInfo(name, (2026, 1, 1, 0, 0, 0))
+        entry.compress_type = zipfile.ZIP_DEFLATED
+        entry.external_attr = 0o100644 << 16
+        target.writestr(entry, p.read_bytes())
+digest = hashlib.sha256(legacy_archive.read_bytes()).hexdigest()
+legacy_archive.with_suffix('.zip.sha256').write_text(digest + '  ' + legacy_archive.name + '\n')
+print(legacy_archive)
