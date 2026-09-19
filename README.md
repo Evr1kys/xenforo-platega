@@ -1,4 +1,4 @@
-![Platega для XenForo — независимое дополнение Evrik](docs/assets/cover.svg)
+![Platega для XenForo](docs/assets/cover.svg)
 
 # Platega для XenForo
 
@@ -6,7 +6,7 @@
 [![Release](https://img.shields.io/github/v/release/Evr1kys/xenforo-platega?include_prereleases)](https://github.com/Evr1kys/xenforo-platega/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Независимое дополнение от [Evrik](https://github.com/Evr1kys) для приёма платежей через [Platega](https://platega.io) в XenForo 2.2 и 2.3. Это личная разработка, не официальный продукт Platega или XenForo. Добавляет оплату через стандартные платёжные профили форума: платные повышения пользователей и покупки в дополнениях, которые используют этот механизм.
+Интеграция платёжного шлюза [Platega](https://platega.io) с XenForo 2.2 и 2.3. Поддерживает оплату повышений пользователей и покупок в дополнениях через стандартные платёжные профили XenForo.
 
 **[Скачать](https://github.com/Evr1kys/xenforo-platega/releases) · [Установка](docs/INSTALL.md) · [Архитектура](docs/ARCHITECTURE.md) · [Проверки](docs/TESTING.md) · [Сообщить об ошибке](https://github.com/Evr1kys/xenforo-platega/issues)**
 
@@ -77,4 +77,6 @@ python3 scripts/check-archive.py
 
 ## Лицензия
 
-[MIT](LICENSE). Независимое дополнение; не является официальным модулем XenForo или Platega.
+[MIT](LICENSE) · Автор: [Evrik](https://github.com/Evr1kys).
+
+Проект не связан с компаниями Platega и XenForo.
