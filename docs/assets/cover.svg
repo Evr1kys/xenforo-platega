@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640">
+<rect width="1280" height="640" fill="#101820"/>
+<path d="M930 0H1280V640H760Z" fill="#17272d"/>
+<circle cx="1140" cy="200" r="275" fill="none" stroke="#254039" stroke-width="1"/>
+<circle cx="1140" cy="200" r="220" fill="none" stroke="#254039" stroke-width="1"/>
+<g font-family="Arial, Helvetica, sans-serif">
+<rect x="64" y="54" width="42" height="42" rx="12" fill="#b1ed7a"/>
+<path d="M76 65H95M76 75H90M76 85H95" fill="none" stroke="#101820" stroke-width="4"/>
+<text x="122" y="83" fill="#f2f6ee" font-size="24" font-weight="700" letter-spacing="3">EVRIK</text>
+<text x="64" y="199" fill="#b1ed7a" font-size="18" letter-spacing="3">ПЛАТЁЖНОЕ ДОПОЛНЕНИЕ</text>
+<text x="59" y="291" fill="#ffffff" font-size="86" font-weight="700">Platega</text>
+<text x="64" y="361" fill="#ffffff" font-size="56">для XenForo</text>
+<text x="66" y="416" fill="#b2c1c7" font-size="23">Оплата покупок и повышений на форуме</text>
+<rect x="64" y="458" width="173" height="40" rx="20" fill="#25353b"/>
+<text x="150" y="485" fill="#e4ecee" font-size="17" text-anchor="middle">XenForo 2.2 / 2.3</text>
+<rect x="249" y="458" width="104" height="40" rx="20" fill="#25353b"/>
+<text x="301" y="485" fill="#e4ecee" font-size="17" text-anchor="middle">PHP 7.4+</text>
+<rect x="365" y="458" width="83" height="40" rx="20" fill="#25353b"/>
+<text x="406" y="485" fill="#e4ecee" font-size="17" text-anchor="middle">MIT</text>
+<g transform="translate(850 160)">
+<rect width="350" height="274" rx="24" fill="#203438" stroke="#456057"/>
+<rect x="26" y="28" width="47" height="36" rx="8" fill="#b1ed7a"/>
+<path d="M37 40H61M37 49H52" stroke="#203438" stroke-width="3"/>
+<text x="26" y="112" fill="#b7c9c6" font-size="17">Повышение пользователя</text>
+<text x="26" y="163" fill="white" font-size="38" font-weight="700">1 000 ₽</text>
+<rect x="26" y="195" width="298" height="52" rx="12" fill="#b1ed7a"/>
+<path d="M72 220l7 7 13-15" stroke="#15271b" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="111" y="228" fill="#15271b" font-size="21" font-weight="700">Оплачено</text>
+</g>
+<path d="M64 550H1216" stroke="#344349"/>
+<text x="64" y="589" fill="#93a7ad" font-size="18">Независимая разработка Evrik · Неофициальный модуль Platega</text>
+</g></svg>

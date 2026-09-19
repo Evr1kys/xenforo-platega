@@ -265,6 +265,24 @@ $admin->testProvider = $provider;
 $reply = $admin->actionIndex();
 $html = $app->templater()->renderTemplate('admin:evrik_platega_payments', $reply->getParams());
 verify(strpos($html, 'request_key') !== false && strpos($html, '_xfToken') !== false, 'Admin page renders CSRF-protected forms');
+$listing = function (array $input) use ($app)
+{
+    $request = new \XF\Http\Request($app->inputFilterer(), $input, [], [], ['REQUEST_METHOD' => 'GET']);
+    return (new TestAdminPayment($app, $request))->actionIndex()->getParams();
+};
+$filtered = $listing(['search' => $lost->request_key, 'profile' => $profile->payment_profile_id, 'status' => 'confirmed', 'page' => 999]);
+verify($filtered['total'] === 1 && $filtered['invoices'][0]['transaction_id'] === $id6, 'Combined filters find the recovered purchase');
+verify($filtered['page'] === 1 && $filtered['status'] === 'CONFIRMED', 'Filtered pagination clamps and status normalizes');
+verify($listing(['search' => $lost->request_key, 'status' => 'PENDING'])['total'] === 0, 'Search cannot bypass status filter');
+verify($listing(['search' => $id6])['total'] === 1, 'Search accepts transaction ID');
+verify($listing(['search' => "' OR 1=1 --"])['total'] === 0, 'Search treats SQL text as a literal');
+$beforeCalls = $client->calls;
+$prefill = $listing(['request_key' => $lost->request_key, 'transaction_id' => $id6]);
+verify($prefill['manualRequestKey'] === $lost->request_key && $prefill['manualTransactionId'] === $id6 && $client->calls === $beforeCalls, 'GET prefills without querying the payment API');
+$invalid = $listing(['request_key' => '<script>', 'transaction_id' => 'bad', 'status' => 'unknown']);
+verify($invalid['manualRequestKey'] === '' && $invalid['manualTransactionId'] === '' && $invalid['status'] === '', 'Invalid prefill and status ignored');
+$indexes = array_column($db->fetchAll('SHOW INDEX FROM xf_evrik_platega_invoice'), 'Key_name');
+verify(!array_diff(['created_date', 'status_created', 'profile_created'], $indexes), 'Invoice indexes installed');
 $html = $app->templater()->renderTemplate('admin:evrik_platega_result', ['requestKey' => $state->requestKey, 'remoteStatus' => $state->remote['status'], 'message' => $state->logMessage, 'failed' => false]);
 verify(strpos($html, $manual->request_key) !== false, 'Admin result renders');
 $denied = false;
