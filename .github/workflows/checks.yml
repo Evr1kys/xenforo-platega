@@ -6,13 +6,13 @@ permissions:
   contents: read
 jobs:
   php:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
         php: ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4', '8.5']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '${{ matrix.php }}'
@@ -22,9 +22,9 @@ jobs:
       - name: Protocol and HTTP client
         run: php tests/protocol.php
   package:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Check XML and build archive
         run: |
           python3 scripts/check-package.py
@@ -35,7 +35,7 @@ jobs:
           second="$(sha256sum dist/Evrik-Platega-*.zip | cut -d' ' -f1)"
           test "$first" = "$second"
           python3 scripts/check-archive.py
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: xenforo-platega
           path: dist/*
